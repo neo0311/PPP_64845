@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
 numDimensions = 2  ##no. of variables to sample from
-numDivisions = 6  ##no of divisions at each dimension
-numSamples = 5
+numDivisions = 10  ##no of divisions at each dimension
+numSamples = 10
 row = []
 for i in range(numDivisions):
      row.append(i)
@@ -36,16 +37,15 @@ while True:
                 temp[k] = a[k]
         #if k == len(sampleIndices)-1:
         if flag ==0:
-            #print(temp)
             sampleIndices[:,j]= temp
-            # for i in range(numDimensions):
-            #     temp_array = Population_indices_temp[i,:] 
-            #     print(Population_indices_temp[Population_indices_temp[i,:] != a[i]])
             j+=1
     # break
     if j>=numSamples:
         break
 print(sampleIndices)
-
+fig, ax = plt.subplots()
+ax.scatter(sampleIndices[0,:], sampleIndices[1,:])
+plt.grid()
+plt.show()
 dimensionSpans = [[0,5], [0,5]]
 ##to solve = last iteration takes k value unnecesserly
