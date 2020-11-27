@@ -1,16 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 numDimensions = 2  ##no. of variables to sample from
-numDivisions = 10  ##no of divisions at each dimension
-numSamples = 10
+numDivisions = 4  ##no of divisions at each dimension
+numSamples = 2
+dimensionSpans = np.asarray([[50000,400000], [0.2,0.5]])
+print(dimensionSpans)
 row = []
 for i in range(numDivisions):
      row.append(i)
 # LHCube = np.zeros(tuple(LHCubeSize))
-Population_indices = np.zeros((numDimensions,numDivisions))
-sampleIndices = np.zeros((numDimensions, numSamples))
+Population_indices = np.zeros((numDimensions,numDivisions))   #array of all indices
+sampleIndices = np.zeros((numDimensions, numSamples), dtype=int)  #array of only sampled indices
 for i in range(numDimensions):
     Population_indices[i,:] = np.asarray(row)
 Population_indices_temp = Population_indices
@@ -43,9 +46,29 @@ while True:
     if j>=numSamples:
         break
 print(sampleIndices)
+population = np.zeros((numDimensions,numDivisions))     #array for storing sides of hypercube(divisions of each dimension)
+eachDivision = np.zeros(numDimensions)
+for i in range(numDimensions):
+    eachDivision[i] = ((dimensionSpans[i,-1] - dimensionSpans[i,0])/numDivisions)
+    for j,value in enumerate(np.arange(dimensionSpans[i,0], dimensionSpans[i,-1], ((dimensionSpans[i,-1] - dimensionSpans[i,0])/numDivisions))):
+        #print(i,j)
+        population[i,j] = value
+print(population)
+print('each divisions',eachDivision)
+LHCsamples = np.zeros((numDimensions,numSamples))
+for i in range(numSamples):
+    sampleCoordinates = np.reshape(sampleIndices[:,i],(numDimensions,1))  #array with coordinate (column of sampleIndices) of sampled value
+    randomValues = np.reshape(np.random.uniform(low=0, high=eachDivision[0], size=numDimensions), (numDimensions,1))
+    #print(randomValues)
+    sampleValues = np.take(population, sampleCoordinates) + randomValues
+    LHCsamples[:,i] = np.reshape(sampleValues, (2))
+    #print(sampleValues)
+print(LHCsamples)
 fig, ax = plt.subplots()
-ax.scatter(sampleIndices[0,:], sampleIndices[1,:])
+ax.scatter(LHCsamples[0,:], LHCsamples[1,:])
+plt.xticks(population[0,:])
+plt.yticks(population[1,:])
+plt.yscale('linear')
 plt.grid()
 plt.show()
-dimensionSpans = [[0,5], [0,5]]
 ##to solve = last iteration takes k value unnecesserly
