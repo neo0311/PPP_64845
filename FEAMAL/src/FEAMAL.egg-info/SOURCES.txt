@@ -1,0 +1,9 @@
+README.md
+setup.py
+src/FEAMAL.egg-info/PKG-INFO
+src/FEAMAL.egg-info/SOURCES.txt
+src/FEAMAL.egg-info/dependency_links.txt
+src/FEAMAL.egg-info/requires.txt
+src/FEAMAL.egg-info/top_level.txt
+src/feamal/__init__.py
+src/feamal/data_prep.py

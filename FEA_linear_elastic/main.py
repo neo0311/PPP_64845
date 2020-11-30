@@ -122,7 +122,7 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
                 F_int = F_int + A.T.dot(f_internal_e)
                 #elaspsed_time= start_time - ti.time()
                 f = open('data_linear_elastic.txt', 'a+')
-                print(E,v,element_length,Q,T,p,f_internal_e[0],f_internal_e[1],f_external_e[0],f_external_e[1],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
+                print(E,v,element_length,Q,T,p,f_internal_e[0,0],f_internal_e[1,0],f_external_e[0,0],f_external_e[1,0],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
                 f.close()
                 #print('total time =', elaspsed_time)
                 #print('count:  ', count, 'element: ', e, 'f_int:  ', f_internal_e.ravel(), 'f_ext:  ', f_external_e.ravel(), 'Kte:   ', Kte.ravel(), '\n')
@@ -170,8 +170,8 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
 
 
 
-num_of_elements=5
-delta_t = 1
+num_of_elements=2
+delta_t = 3
 #convergence_elastic_study()
 #convergence_viscoelastic_study()
 #pipe_widening(delta_t, num_of_elements)
@@ -180,8 +180,9 @@ delta_t = 1
 #main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)  ##viscoelastic
 f= open('data_linear_elastic.txt', 'w')
 f.truncate(0)
-f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[0,0],kte[0,1],kte[1,0],kte[1,1]\n')
+f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
 f.close()
-for E in range(50000, 400000+50000, 50000):
-    for v in np.arange(0.2, 0.5, 0.05):
+for E in range(50000, 400000+100000, 100000):
+    for v in np.arange(0.2, 0.5, 0.1):
         main(E, v, Q*0, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)
+        #print(E,v)

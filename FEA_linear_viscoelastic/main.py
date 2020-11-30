@@ -170,8 +170,8 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
 
 
 
-num_of_elements=5
-delta_t = 1
+num_of_elements=2
+delta_t = 3
 #convergence_elastic_study()
 #convergence_viscoelastic_study()
 #pipe_widening(delta_t, num_of_elements)
@@ -180,8 +180,9 @@ delta_t = 1
 #main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)  ##viscoelastic
 f= open('data_linear_elastic.txt', 'w')
 f.truncate(0)
-f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[0,0],kte[0,1],kte[1,0],kte[1,1]\n')
+f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
 f.close()
-for E in range(50000, 400000+50000, 50000):
-    for v in np.arange(0.2, 0.5, 0.05):
+for E in range(50000, 400000+100000, 100000):
+    for v in np.arange(0.2, 0.5, 0.1):
         main(E, v, Q*0, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)
+        #print(E,v)
