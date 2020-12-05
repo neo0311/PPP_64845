@@ -7,3 +7,4 @@ src/FEAMAL.egg-info/requires.txt
 src/FEAMAL.egg-info/top_level.txt
 src/feamal/__init__.py
 src/feamal/data_prep.py
+src/feamal/neural_network.py

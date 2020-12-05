@@ -1,7 +1,7 @@
-from feamal.data_prep import LHC
-import numpy as np
-numDimensions = 2  ##no. of variables to sample from
-numDivisions = 10  ##no of divisions at each dimension
-numSamples = 9
-dimensionSpans = np.asarray([[50000,400000], [0.2,0.5]])
-print(LHC(numSamples, numDimensions, numDivisions, dimensionSpans))
+from feamal.neural_network import *
+
+a = NeuralNetwork((4, 2, 1))
+x = np.asarray((-10, -5, 0.0, 5, 10))
+print(a.activation(x, type="leakyrelu"))
+#print(a.construct_weights())
+#print(a.weights_and_biases)
