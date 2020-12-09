@@ -11,3 +11,8 @@ setup(
 
 #batch normalisation
 #validation dataset
+
+##tests
+#-LHC
+#test_train_split
+#construct_weights
