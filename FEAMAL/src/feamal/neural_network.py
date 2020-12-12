@@ -4,7 +4,7 @@ import numpy as np
 class NeuralNetwork:
     """ A neural network"""
     
-    def __init__(self, architecture, X=[], activations=[]):
+    def __init__(self, architecture, X=[], y=[], activations=[]):
         """
         architecture: array with neural network structure information
         activations:  array with activation functions to be used in each layer
@@ -12,6 +12,7 @@ class NeuralNetwork:
         self.architecture = np.asarray(architecture ,dtype=int)
         self.activations = np.asarray(activations)
         self.input = X
+        self.output = y
         self.weights_and_biases = {}
     
     def construct_weights(self, method= "random", W = np.zeros(1), b = np.zeros(1)):
@@ -37,7 +38,7 @@ class NeuralNetwork:
     def activation(self, x, type="swish", alpha=0.01):
         """ Defines the activation function"""
         x = np.asarray(x, dtype=float)
-        #print(x)
+        print(np.shape(x))
         if type == "swish":
             return x/(1+np.exp(-x))
         
@@ -53,7 +54,18 @@ class NeuralNetwork:
         if type == "sigmoid":
             return 1/(1+np.exp(-x))
     
-    
+    def cost_functions(self, y_predicted, y, type="mse"):
+        """
+        Defines various cost functions
+        y_predicted: nD array with predicted outputs
+        y          : nD array with actual outputs
+        mse        : mean squared error
+        loss       : loss 
+        """
+        no_of_samples = len(y_predicted)
+        if type  == "mse":
+            return (1/no_of_samples)*((y - y_predicted)**2).sum()
+
     def forward_propagate(self):
         """Carries out forward propagation of through the neural network
            returns: the output of the last layer(output)
@@ -73,21 +85,24 @@ class NeuralNetwork:
         #print(A)
         return y_predicted
 
-    def forward_propagate2(self):
-        """Carries out forward propagation of through the neural network
-           returns: the output of the last layer(output)
-                 A: ndarray which stores the activated output at each layer
-                 Z: variable to temporarly store values before activation
-            """
-        A = np.zeros((len(self.architecture)), dtype=object)
-        A[0] = self.input
-        #print(A)
-        for layer, activation_function in zip(range(1, len(self.architecture)),self.activations):
-            #print(A[layer-1], self.weights_and_biases[f'W{layer}'])
-            #print(layer, activation_function)
-            Z = (A[layer-1].dot(self.weights_and_biases[f'W{layer}']) + self.weights_and_biases[f'b{layer}'])
-            activation_function = self.activations[layer-1]
-            A[layer] = self.activation(Z,type=activation_function)
-        y_predicted = A[layer]
-        return y_predicted
 
+    def derivatives(self, x, function, alpha=0.01):
+        if function == "sigmoid":
+            dadz = self.activation(x,"sigmoid")*(1-self.activation(x,"sigmoid"))
+            return dadz
+
+        if function == "swish":
+            dadz = self.activation(x,"sigmoid") + x * self.activation(x,"sigmoid") * (1-self.activation(x,"sigmoid"))
+            return dadz
+        
+        if function == "linear":
+            dadz = np.ones(np.shape(x))
+            return dadz
+
+        if function == "relu":
+            dadz = np.greater(x, 0).astype(int)
+            return dadz
+
+        if function == "leakyrelu":
+            dadz = 1 * (x > 0) + alpha * (x<0)
+            return dadz

@@ -1,7 +1,7 @@
 FEAMaL
 ======
 
-A Python package for three-dimensional geometry.
+A Python package for optimising FE simulations.
 
 
 Installation
