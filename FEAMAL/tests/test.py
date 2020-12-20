@@ -1,95 +1,139 @@
 from feamal.neural_network import *
-#from sklearn.metrics import mean_squared_error
-#import tensorflow as tf
-# a = NeuralNetwork((4, 2, 1))
-# b = NeuralNetwork((4, 2, 1))
-# x = np.asarray((-10, -5, 0.0, 5, 10))
-# #a = [[1], [[1,2],[2,3]]]
+import numpy as np
+from feamal.network import *
 
-# b.construct_weights()
-# print(a.weights_and_biases)
-# print(b.weights_and_biases)
-# a = NeuralNetwork((3,2,2), X = np.ones(3), activations=('swish', 'swish'))
-# c = NeuralNetwork((3,2,1), X = np.ones(3), activations=('swish', 'swish'))
-# W1 = np.ones((3,2))
-# W2 = np.ones((2,2))
-# b1 = np.zeros((2))
-# b2 = np.zeros((2))
-#W = np.asarray((W1, W2),dtype=object)
-#b = np.asarray((b1, b2),dtype=object)
-#a.construct_weights(method="manual",W = W, b = b)
-#c.construct_weights()
-#b = a.weights_and_biases['W1']
-# print(c.forward_propagate())
-# print(c.weights_and_biases)
+X = np.asarray((1,4,3,4))
+y = np.asarray((1,4,3))
 
-#print('a')
-#print(a.weights_and_biases)
-#print('input',a.input, '*', 'W1', W1)
-#print('forward', a.forward_propagate())
+X_pred = np.asarray((1,4,2, 4))
+a = NeuralNetwork((4,2,3), X , activations=('swish','swish'))
+W1 = np.array(([1,1],[0.5,0.25],[0,0.75],[0.25,0.25]))
+W2 = np.array(([1,1,1],[1,1,0.5]))
+b1 = np.zeros(2)
+b2 = np.zeros(3)
+W = np.asarray((W1, W2),dtype=object)
+b = np.asarray((b1, b2),dtype=object)
+a.construct_weights(method='manual', W=W, b=b)
+#print(a.derivatives(X,'swish'))
+X1 = np.asarray(([1,4,3,0], [1,4,2,0], [1,4,3,0]))
+X1_pred = np.asarray(([1,4,2,0], [1,4,2,0], [1,4,2,0]))
 
-#print(a.activation(np.asarray((3,3)),'swish'))
-#c = np.asarray(b[0])
-#print(W[0])
-# d = NeuralNetwork((1,1,1), X = np.ones((3,1)), activations=('swish','swish'))
-# W1 = 1
-# W2 = 1
-# b1 = 1
-# b2 = 1
-# W = np.asarray((W1, W2),dtype=object)
-# b = np.asarray((b1, b2),dtype=object)
-# d.construct_weights(method='manual', W=W, b=b)
-# print(d.forward_propagate())
-# m = np.array(([1,1],[1,1],[1,1]))
-# print(np.shape(m))
-# X = np.asarray((1,4,3,0))
-# a = NeuralNetwork((4,2,3), X , activations=('swish','swish'))
-# W1 = np.array(([1,1],[0.5,0.25],[0,0.75],[0.25,0.25]))
-# W2 = np.array(([1,1,1],[1,1,0.5]))
-# b1 = np.zeros(2)
-# b2 = np.zeros(3)
-# W = np.asarray((W1, W2),dtype=object)
-# b = np.asarray((b1, b2),dtype=object)
-# a.construct_weights(method='manual', W=W, b=b)
-
-# ##analytical
-# input_to_layer_1 = X
-# input_to_hidden_layer = input_to_layer_1.dot(W1)+ b1
-# after_activation_of_hidden_layer = a.activation(input_to_hidden_layer, type='swish')
-# input_to_final_layer = after_activation_of_hidden_layer.dot(W2) + b2
-# output = a.activation(input_to_final_layer, type='swish')
-# print(a.forward_propagate())
-# print(output)
-# y_pred = np.asarray(([1,0.6],[1,0.7]))
-# y = np.asarray(([2,0.3],[2,0.2]))
-# y_ = ([1,2,3],([1,2,3]))
-# print(np.shape(y_pred))
-# print(np.shape(y))
-# print(np.shape(y_))
-
-
-#print(mean_squared_error(y_pred, y, ))
-#print(tf.losses.mse(y_pred, y))
-a = NeuralNetwork((4,2,1))
-x = np.asarray(([0,1,6,-3,6], [0,1,6,-3,6]))
-y = a.activation(x,"swish")
-z = a.derivatives(x, "swish")
-print(x)
-print(y)
-print(z)
-# X = np.asarray((1,4,3,0))
-# a = NeuralNetwork((4,2,3), X , activations=('swish','swish'))
-# W1 = np.array(([1,1],[0.5,0.25],[0,0.75],[0.25,0.25]))
-# W2 = np.array(([1,1,1],[1,1,0.5]))
-# b1 = np.zeros(2)
-# b2 = np.zeros(3)
-# W = np.asarray((W1, W2),dtype=object)
-# b = np.asarray((b1, b2),dtype=object)
-# a.construct_weights(method='manual', W=W, b=b)
-# print(a.derivatives(X,'swish'))
-# X1 = np.asarray(([1,4,3,0], [1,4,-3,0]))
-# c = NeuralNetwork((4,2,3), X1 , activations=('swish','swish'))
-# c.construct_weights(method='manual', W=W, b=b)
-
-# #print((c.forward_propagate()))
+c = NeuralNetwork((4,2,3), X1 , activations=('swish','linear'))
+c.construct_weights(method='manual', W=W, b=b)
+a.forward_propagate()
 # print(c.derivatives(X1,'swish'))
+#print((X1**2))
+#print(a.cost_functions(X1,X1_pred))
+a.back_propagate(y)
+#print(a.weights_and_biases)
+dictionary = a.weights_and_biases
+#print(a.parameters)
+#print(a.weights_and_biases)
+#print(np.multiply(np.dot(a.parameters['delta_2'],a.weights_and_biases['W2'].T), a.derivatives(a.parameters['Z1'],'swish')))  
+
+#print('delta_1', np.multiply(first,second))
+#print('dCdW1', np.outer(a.parameters['A0'],(np.multiply(first,second))))
+#print('dCdW2',a.parameters['dCdW2'])
+def dict_to_vector(dictionary):
+    vector = []
+    for key in dictionary:
+        vector = np.concatenate((vector,dictionary[f'{key}'].flatten()))
+    return vector
+
+#vector = dict_to_vector(dictionary)
+
+def vector_to_dict(vector, original_dictionary):
+    new_dictionary = {}
+    current_index = 0
+    for key,item in original_dictionary.items():
+        new_index = current_index + item.size
+        new_dictionary[f'{key}'] =  np.reshape(vector[current_index:new_index],item.shape)
+        current_index = new_index
+    return new_dictionary
+
+def gradient_checking():
+    X = np.asarray([2,3,5,6])
+    y = np.asarray([1,6,3])
+    a = NeuralNetwork((4,3,3), X , activations=('swish','swish'))
+    a.construct_weights()
+    #print('original weights', a.weights_and_biases,'\n')
+    a.forward_propagate()
+    a.back_propagate(y)
+    #print('all_data_original', a.all_data, '\n')
+
+    #print('original_gradients', a.parameter_gradients, '\n')
+    #print(a.weights_and_biases)
+    #print(a.parameters)
+    parameters_original = a.weights_and_biases
+    original_gradients = a.parameter_gradients
+    original_gradients_vector = dict_to_vector(original_gradients)
+    parameters_vector = dict_to_vector(parameters_original)
+    grad_two_sided_vector = np.zeros(len(parameters_vector))
+    epsilon = 1e-7
+    for j in range(len(parameters_vector)):
+        parameters_vector = dict_to_vector(parameters_original)
+        parameters_vector[j] = parameters_vector[j] + epsilon
+        a.weights_and_biases = vector_to_dict(parameters_vector,parameters_original)
+        #print(a.weights_and_biases, '\n')
+
+        y_pred = a.forward_propagate()
+        C_plus = a.cost_functions(y_pred,y) 
+        parameters_vector = dict_to_vector(parameters_original)
+        parameters_vector[j] = parameters_vector[j] - epsilon
+        a.weights_and_biases = vector_to_dict(parameters_vector,parameters_original)
+        #print(a.weights_and_biases)
+
+        y_pred = a.forward_propagate()
+        C_minus = a.cost_functions(y_pred,y)
+        grad_two_sided_vector[j] = (C_plus - C_minus)/(2*epsilon)
+        print(j,C_minus-C_plus)
+    #print('grad approx', vector_to_dict(grad_two_sided_vector,original_gradients),'\n')
+    #print('grad_original', original_gradients,'\n')
+
+    print(grad_two_sided_vector, original_gradients_vector)
+    error_difference = (np.linalg.norm(original_gradients_vector-grad_two_sided_vector))/(np.linalg.norm(grad_two_sided_vector) + np.linalg.norm(original_gradients_vector))
+    return error_difference
+#print(gradient_checking())
+
+
+def two_layer_network_check():
+    X = np.asarray((3))
+    a = NeuralNetwork((1,1),X,activations=['swish'])
+    a.construct_weights()
+    a.forward_propagate()
+    print(a.forward_propagate())
+
+def check_complete():
+    X = np.asarray((1,2,3))
+    y = np.asarray([4,0])
+    mine = NeuralNetwork((3,2,2), X, activations=('swish','linear'))
+    mine.construct_weights()
+    mine.forward_propagate()
+    mine.back_propagate(y)
+    parameters_vector = dict_to_vector(mine.weights_and_biases)
+    gradient_vector = dict_to_vector(mine.parameter_gradients)
+    parameters_vector = parameters_vector - 0.01 * gradient_vector
+    mine.weights_and_biases = vector_to_dict(parameters_vector, mine.weights_and_biases)
+    print(mine.forward_propagate())
+
+
+def backprop_check():
+    eta = 0.8
+    X = np.asarray((1,4,3,5))
+    a = NeuralNetwork((4,2,10,3), X , activations=('swish','swish','linear'))
+    y = np.asarray((5.355,6.7475,10.0945))
+    a.construct_weights()
+    for i in range(10000):
+        y_pred = a.forward_propagate()
+        Cost = a.cost_functions(y_pred,y)
+        print('iteration', i)
+        print('cost', Cost)
+        a.back_propagate(y)
+        weights_and_biases_vector = dict_to_vector(a.weights_and_biases)
+        gradient_vector = dict_to_vector(a.parameter_gradients)
+        new_weights_and_biases_vector = weights_and_biases_vector - eta * gradient_vector
+        a.weights_and_biases = vector_to_dict(new_weights_and_biases_vector, a.weights_and_biases)
+        if Cost<1e-10:
+            break
+
+backprop_check()

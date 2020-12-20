@@ -67,7 +67,7 @@ def LHCSampling(numSamples=int, numDimensions=int, numDivisions=int, dimensionSp
 # dimensionSpans = np.asarray([[50000,400000], [0.2,0.5]])
 # print(LHCSampling(numSamples, numDimensions, numDivisions, dimensionSpans))
 
-def test_train_split(numInputFeatures, train_test_ratio=0.8, filename=str, delimiter=',', header_present=True):
+def test_train_split(numInputFeatures, filename=str, train_test_ratio=0.8, delimiter=',', header_present=True):
     raw_data = np.genfromtxt(filename, delimiter=delimiter, dtype=str)
     m = np.shape(raw_data)[0]  #number of lines in file
     n = np.shape(raw_data)[1]  #number of columns in file

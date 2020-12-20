@@ -1,5 +1,5 @@
 from feamal.neural_network import *
-# Point.__eq__
+
 def test_nn_correctly_takes_architecture_data():
     assert(NeuralNetwork((4, 2, 1)).architecture.all() == np.asarray((4, 2, 1)).all()) == True
 
@@ -82,11 +82,17 @@ def test_cost_function_mse_same_predicted_and_actual_outputs_return_zero_loss():
     y_predicted = y
     assert((NeuralNetwork((4, 2, 1)).cost_functions(y_predicted,y)) == 0)
 
-def test_cost_function_mse():
+def test_loss_function_mse():   ##for one training example with 4 output elements
     y = np.array([1,2,6,4])
     y_predicted = ([0,0.5,6,3])
     mse = (1/4)*((y_predicted - y)**2).sum()
-    assert((NeuralNetwork((4, 2, 1)).cost_functions(y_predicted,y)) == mse)
+    assert((NeuralNetwork((4, 2, 4)).cost_functions(y_predicted,y)) == mse)
+
+def test_cost_function_mse():
+    y = np.array(([1,2], [2,3], [0.5,4]))
+    y_predicted = ([0,0.5],[3,0.6],[1,2])
+    mse = (1/2)*(1/3)*(((y_predicted - y)**2).sum()).sum()
+    assert((NeuralNetwork((4, 2, 2)).cost_functions(y_predicted,y)) == mse)
 
 def test_derivative_sigmoid():
     a = NeuralNetwork((4,2,1))
@@ -112,3 +118,4 @@ def test_derivative_leakyrelu():
     a = NeuralNetwork((4,2,1))
     x = np.asarray([0,1,6,-3,6])
     assert((a.derivatives(x, "leakyrelu")).all()) == np.asarray([0, 1, 1, 0.01, 1]).all()
+
