@@ -67,15 +67,45 @@ def LHCSampling(numSamples=int, numDimensions=int, numDivisions=int, dimensionSp
 # dimensionSpans = np.asarray([[50000,400000], [0.2,0.5]])
 # print(LHCSampling(numSamples, numDimensions, numDivisions, dimensionSpans))
 
-def test_train_split(numInputFeatures, filename=str, train_test_ratio=0.8, delimiter=',', header_present=True):
-    raw_data = np.genfromtxt(filename, delimiter=delimiter, dtype=str)
-    m = np.shape(raw_data)[0]  #number of lines in file
-    n = np.shape(raw_data)[1]  #number of columns in file
-    if header_present == True:
-        numTotalData = m-1     #number of total data sets
-        firstIndex = 1
-        flag = 0
+# def test_train_split_back(numInputFeatures, train_test_ratio=0.8, filename=str, delimiter=',', header_present=True):
+#     raw_data = np.genfromtxt(filename, delimiter=delimiter, dtype=str)
+#     m = np.shape(raw_data)[0]  #number of lines in file
+#     n = np.shape(raw_data)[1]  #number of columns in file
+#     if header_present == True:
+#         numTotalData = m-1     #number of total data sets
+#         firstIndex = 1
+#         flag = 0
+#     else:
+#         numTotalData = m
+#         firstIndex = 0
+#         flag = 1
+#     numTrainData, numTestData = int(train_test_ratio*numTotalData), int(numTotalData - int(train_test_ratio*numTotalData)) #number of training and test data
+#     indicesDataSets = (np.linspace(firstIndex,numTotalData-flag,numTotalData)).astype(int) #array with indices of data sets
+#     np.random.shuffle(indicesDataSets)
+#     indicesTrainData = indicesDataSets[:numTrainData]   #indices of train data sets
+#     indicesTestData = indicesDataSets[numTrainData:]   #indices of test data sets
+#     X_train = (np.take(raw_data[:,:numInputFeatures], indicesTrainData, axis=0)).astype(np.float)   #slicing training input data from dataset
+#     y_train = (np.take(raw_data[:,numInputFeatures:], indicesTrainData, axis=0)).astype(np.float)   #slicing training output data from dataset
+#     X_test = (np.take(raw_data[:,:numInputFeatures], indicesTestData, axis=0)).astype(np.float)
+#     y_test = (np.take(raw_data[:,numInputFeatures:], indicesTestData, axis=0)).astype(np.float)
+#     return X_train, y_train, X_test, y_test
+
+def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True):
+    if type(filename_or_array) == str:
+        raw_data = np.genfromtxt(filename_or_array, delimiter=delimiter, dtype=str)
+        m = np.shape(raw_data)[0]  #number of lines in file
+        n = np.shape(raw_data)[1]  #number of columns in file
+        if header_present == True:
+            numTotalData = m-1     #number of total data sets
+            firstIndex = 1
+            flag = 0
+        else:
+            numTotalData = m
+            firstIndex = 0
+            flag = 1
     else:
+        m = np.shape(filename_or_array)[0]  #number of lines in file
+        n = np.shape(filename_or_array)[1]
         numTotalData = m
         firstIndex = 0
         flag = 1
@@ -89,5 +119,27 @@ def test_train_split(numInputFeatures, filename=str, train_test_ratio=0.8, delim
     X_test = (np.take(raw_data[:,:numInputFeatures], indicesTestData, axis=0)).astype(np.float)
     y_test = (np.take(raw_data[:,numInputFeatures:], indicesTestData, axis=0)).astype(np.float)
     return X_train, y_train, X_test, y_test
-
 #test_train_split(6, train_test_ratio=0.8, filename="data_linear_elastic.txt", delimiter=',', header_present=True)
+
+def shuffle_data(X, y):
+    """
+    Shuffles the data sets 
+    X : nd array containing the inputs (eg: X_train)
+    y : nd array containing the corresponding outputs (eg: y_train)
+    returns 
+    corresponding shuffled data sets
+    """
+    data = np.concatenate((X, y),axis=1)
+    np.random.shuffle(data)
+    n = np.shape(X)[1]  #num_of_column_elements_first_array
+    X_shuffled =   data[:,:n] #slicing input data from dataset
+    y_shuffled =    data[:,n:] #slicing output data from dataset
+    return X_shuffled, y_shuffled
+
+def z_score_normalise(array):
+    for i in range(np.shape(array)[1]):
+        mean = np.mean(array[:,i])
+        std = np.std(array[:,i])
+        for j in range(np.shape(array)[0]):
+            array[j,i]= (array[j,i] - mean)/std
+    return array

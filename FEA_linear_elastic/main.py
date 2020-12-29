@@ -86,7 +86,6 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
             F_int = np.zeros((num_of_elements+1, 1))
             
             for e in range(1,num_of_elements+1):  ###assembling of internal and external forces and calculating displacements
-                start_time = ti.time()
 
                 ##elemental structural data calculation
                 element_length = rnodes[e] - rnodes[e-1]
@@ -95,7 +94,6 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
                 ue = A@uk
 
                 ##elemental material data calculation
-                element_start_time = ti.time()
 
                 C_ = C(E, v)
                 N_ = N(0)
@@ -122,7 +120,10 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
                 F_int = F_int + A.T.dot(f_internal_e)
                 #elaspsed_time= start_time - ti.time()
                 f = open('data_linear_elastic.txt', 'a+')
-                print(E,v,element_length,Q,T,p,f_internal_e[0,0],f_internal_e[1,0],f_external_e[0,0],f_external_e[1,0],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
+                #print(E,v,element_length,Q,T,p,f_internal_e[0,0],f_internal_e[1,0],f_external_e[0,0],f_external_e[1,0],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
+                print(E,v,element_length,p,f_internal_e[0,0],f_internal_e[1,0],f_external_e[0,0],f_external_e[1,0],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
+                #print(E,v,element_length,p,np.format_float_scientific(f_internal_e[0,0]),np.format_float_scientific(f_internal_e[1,0]),sep=',', file=f)
+                
                 f.close()
                 #print('total time =', elaspsed_time)
                 #print('count:  ', count, 'element: ', e, 'f_int:  ', f_internal_e.ravel(), 'f_ext:  ', f_external_e.ravel(), 'Kte:   ', Kte.ravel(), '\n')
@@ -151,7 +152,7 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
     u_analytical = analytical_elastic(E,v,p,a,b,mesh(a,b,num_of_elements, 2))  ##analytical solution
     #print(u_analytical)
     #print((u_analytical-um.T))
-    if (abs(u_analytical-um.T)).max() > 1e-15:
+    if (abs(u_analytical-um.T)).max() > 1e-10:
         print('inaccurate solution', abs(u_analytical-um.T).max())
         
     # fig , ax = plt.subplots()
@@ -170,7 +171,7 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
 
 
 
-num_of_elements=2
+num_of_elements=3
 delta_t = 3
 #convergence_elastic_study()
 #convergence_viscoelastic_study()
@@ -178,11 +179,19 @@ delta_t = 3
 
 #main(E, v, Q*0, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)  ##elastic
 #main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)  ##viscoelastic
+#f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
+
 f= open('data_linear_elastic.txt', 'w')
 f.truncate(0)
-f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
+f.write('E,v,element_length,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
+#f.write('E,v,element_length,p,f_int[0],f_int[1]\n')
+#f.write('E,v,element_length,Q,T,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
+
 f.close()
-for E in range(50000, 400000+100000, 100000):
-    for v in np.arange(0.2, 0.5, 0.1):
-        main(E, v, Q*0, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)
-        #print(E,v)
+i = 0
+from feamal.data_prep import *
+dimensionSpans = np.asarray([[45000,450000], [0.2,0.5]])
+Samples = LHCSampling(2,2,500, dimensionSpans,plot=False)
+for E,v in zip(Samples[0,:],Samples[1,:]):
+
+    main(E, v, Q*0, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_elements)

@@ -1,6 +1,6 @@
 from feamal.neural_network import *
+from feamal.data_prep import *
 import numpy as np
-from feamal.network import *
 
 X = np.asarray((1,4,3,4))
 y = np.asarray((1,4,3))
@@ -136,4 +136,80 @@ def backprop_check():
         if Cost<1e-10:
             break
 
-backprop_check()
+#backprop_check()
+
+def shuffle_check():
+    X, y, X_test, y_test = test_train_split(3, 'dummy.txt')
+    data = np.concatenate((X, y),axis=1)
+    print(X,y)
+    np.random.shuffle(data)
+    n = np.shape(X)[1]  #num_of_column_elements_first_array
+    X_shuffled =   data[:,:n] #slicing input data from dataset
+    y_shuffled =    data[:,n:] #slicing output data from dataset
+    return X_shuffled, y_shuffled
+
+#X ,y = shuffle_check()
+#print(X,y)
+
+
+
+def Multiple_inputs():
+
+    X = np.asarray(([1,3],[1,3]))
+    y =np.asarray(([1],[1]))
+    X_single = np.asarray(([1,3]))
+    y_single =np.asarray(([1]))
+    a = NeuralNetwork((2,3,1),activations=('swish', 'linear'))
+    a.construct_weights()
+
+    y_pred = a.forward_propagate(X)
+    a.back_propagate_bk(y)
+    print('old method, 2 dtaset',a.parameter_gradients)
+    #print('old method, 2 dtaset',a.all_data)
+    a.back_propagate(y)
+    print('new mwthod, 2 dtaset', a.parameter_gradients)
+    #print('new method, 2 dtaset',a.all_data)
+
+    y_pred_single = a.forward_propagate(X_single)
+
+
+
+
+    a.back_propagate_bk(y_single)
+    print('old method, single dtaset',a.parameter_gradients)
+    #print('old method, single dtaset',a.all_data)
+
+    a.back_propagate(y_single)
+    print('new mwthod, sinngle dtaset', a.parameter_gradients)
+    #print('new method, single dtaset',a.all_data)
+
+
+    print('y_pred',y_pred)
+    print('y_pred_single',y_pred_single)
+
+    print('cost', a.cost_functions(y_pred,y))
+    print('cost_single', a.cost_functions(y_pred_single,y_single))
+
+
+
+#Multiple_inputs()
+
+def single_inputs():
+
+    X = np.asarray(([1,3]))
+    y =np.asarray(([1]))
+    a = NeuralNetwork((2,3,1),activations=('swish', 'linear'))
+    a.construct_weights()
+    y_pred = a.forward_propagate(X)
+    print(y_pred)
+    print('cost', a.cost_functions(y_pred,y))
+
+#single_inputs()
+
+def test_linspace():
+    n =256
+    
+    print(np.linspace(1,n,n))
+
+
+def test_leaky_relu():

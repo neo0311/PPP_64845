@@ -1,7 +1,5 @@
-import numpy as np
-
-u = np.ones((1,2))
-v = np.ones((2,1))
-for i in range(10):
-    A = np.random.randint(10, size=(2, 2))
-    print(A, u@A@v, (u@A@v)/v@u)
+from feamal.data_prep import *
+dimensionSpans = np.asarray([[45000,450000], [0.2,0.5]])
+Samples = LHCSampling(40,2,100, dimensionSpans,plot=True)
+for E,v in zip(Samples[0,:],Samples[1,:]):
+    print(E,v)
