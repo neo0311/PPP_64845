@@ -60,35 +60,72 @@ def LHCSampling(numSamples=int, numDimensions=int, numDivisions=int, dimensionSp
         plt.show()
     return(LHCsamples)
 
+def QMC_sampling(numSamples, numDimensions, dimensionSpans,sequence='halton', randomize=True, plot=False):
+    """
+    -reduces the likelihood of clustering (discrepancy) 
+    dimensionSpans : a numpy array withlower and upper bounds for each dimension eg:np.asarray([dim1_lower, dim1_upper],[dim2_lower, dim2_upper])
+                     (should have 2 indices even for 1 diamension, ie, shape = (1,2))
+    """
+    QMC_samples = np.zeros((numDimensions, numSamples))
+    if sequence == 'halton':
+        primes = np.asarray((2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97))
+        for dimension in range(numDimensions):
+            min_ = np.min(dimensionSpans[dimension,:])
+            max_ = np.max(dimensionSpans[dimension,:])
+            base = primes[dimension]
+            for i in range(1,numSamples+1):
 
-# numDimensions = 2  ##no. of variables to sample from
-# numDivisions = 10  ##no of divisions at each dimension
-# numSamples = 9
-# dimensionSpans = np.asarray([[50000,400000], [0.2,0.5]])
-# print(LHCSampling(numSamples, numDimensions, numDivisions, dimensionSpans))
+                i_th_sample = 0
+                binary = np.base_repr(i, base)
+                #print(i,binary[::-1])
+                for j,value in enumerate(binary[::-1]):
+                    i_th_sample += int(value)/np.power(base,(j+1))
+                if randomize==True:
+                    U = i_th_sample * (max_ -min_) + min_ + np.random.random(1)
+                    if min_ <= U <= max_:
+                        QMC_samples[dimension,i-1] = U
+                    else:
+                        i_th_sample = i_th_sample * (max_ -min_) + min_
+                        QMC_samples[dimension,i-1] = i_th_sample
 
-# def test_train_split_back(numInputFeatures, train_test_ratio=0.8, filename=str, delimiter=',', header_present=True):
-#     raw_data = np.genfromtxt(filename, delimiter=delimiter, dtype=str)
-#     m = np.shape(raw_data)[0]  #number of lines in file
-#     n = np.shape(raw_data)[1]  #number of columns in file
-#     if header_present == True:
-#         numTotalData = m-1     #number of total data sets
-#         firstIndex = 1
-#         flag = 0
-#     else:
-#         numTotalData = m
-#         firstIndex = 0
-#         flag = 1
-#     numTrainData, numTestData = int(train_test_ratio*numTotalData), int(numTotalData - int(train_test_ratio*numTotalData)) #number of training and test data
-#     indicesDataSets = (np.linspace(firstIndex,numTotalData-flag,numTotalData)).astype(int) #array with indices of data sets
-#     np.random.shuffle(indicesDataSets)
-#     indicesTrainData = indicesDataSets[:numTrainData]   #indices of train data sets
-#     indicesTestData = indicesDataSets[numTrainData:]   #indices of test data sets
-#     X_train = (np.take(raw_data[:,:numInputFeatures], indicesTrainData, axis=0)).astype(np.float)   #slicing training input data from dataset
-#     y_train = (np.take(raw_data[:,numInputFeatures:], indicesTrainData, axis=0)).astype(np.float)   #slicing training output data from dataset
-#     X_test = (np.take(raw_data[:,:numInputFeatures], indicesTestData, axis=0)).astype(np.float)
-#     y_test = (np.take(raw_data[:,numInputFeatures:], indicesTestData, axis=0)).astype(np.float)
-#     return X_train, y_train, X_test, y_test
+                else:
+                    i_th_sample = i_th_sample * (max_ -min_) + min_
+                    QMC_samples[dimension,i-1] = i_th_sample
+    if sequence == 'hammersley':
+        primes = np.asarray((2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97))
+        for dimension in range(numDimensions):
+            min_ = np.min(dimensionSpans[dimension,:])
+            max_ = np.max(dimensionSpans[dimension,:])
+            base = primes[dimension]
+            for i in range(1,numSamples+1):
+
+                i_th_sample = 0
+                binary = np.base_repr(i, base)
+                #print(i,binary[::-1])
+                if dimension == numDimensions-1:
+                    i_th_sample = i/numSamples
+                else:
+                    for j,value in enumerate(binary[::-1]):
+                        i_th_sample += int(value)/np.power(base,(j+1))
+                if randomize==True:
+                    U = i_th_sample * (max_ -min_) + min_ + np.random.random(1)
+                    if min_ <= U <= max_:
+                        QMC_samples[dimension,i-1] = U
+                    else:
+                        i_th_sample = i_th_sample * (max_ -min_) + min_
+                        QMC_samples[dimension,i-1] = i_th_sample
+
+                else:
+                    i_th_sample = i_th_sample * (max_ -min_) + min_
+                    QMC_samples[dimension,i-1] = i_th_sample    
+    if plot==True:
+    #fig, ax = plt.subplots()
+        plt.scatter(QMC_samples[0,:], QMC_samples[1,:])
+        plt.grid()
+        plt.show()
+    
+    return QMC_samples
+
 
 def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True):
     if type(filename_or_array) == str:
@@ -136,10 +173,31 @@ def shuffle_data(X, y):
     y_shuffled =    data[:,n:] #slicing output data from dataset
     return X_shuffled, y_shuffled
 
-def z_score_normalise(array):
-    for i in range(np.shape(array)[1]):
-        mean = np.mean(array[:,i])
-        std = np.std(array[:,i])
-        for j in range(np.shape(array)[0]):
-            array[j,i]= (array[j,i] - mean)/std
+def data_transform(array, type='z_score_norm'):
+    """
+    Transforms data in the given array according to the type
+    array   :an nd numpy array. 
+    type    :'z_score_norm' = implements z score normalisation using mean and standard deviation on each column (datasets of each variable) of the given array.
+             'min_max_norm' = implements min max scaling on each column (datasets of each variable) of the given array.
+    """
+    if array.ndim == 1:
+        array = np.reshape(array,(len(array),1))
+    if type== "z_score_norm":
+        for i in range(np.shape(array)[1]):
+            mean = np.mean(array[:,i])
+            std = np.std(array[:,i])
+            if mean == 0 and std == 0:
+                continue
+            for j in range(np.shape(array)[0]):
+                array[j,i]= (array[j,i] - mean)/std
+
+    if type == "min_max_norm":
+        for i in range(np.shape(array)[1]):
+            min_ = min(array[:,i])
+            max_ = max(array[:,i])
+            print(min_, max_)
+            if min_ == 0 and max_ == 0:
+                continue
+            for j in range(np.shape(array)[0]):
+                array[j,i]= (array[j,i] - min_)/(max_ - min_)
     return array
