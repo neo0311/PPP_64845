@@ -38,7 +38,7 @@ class NeuralNetwork():
     #             self.weights_and_biases[f'b{i}'] = b[i-1] 
     #     return self.weights_and_biases
 
-    def construct_weights(self, method= "random", W = np.zeros(1), b = np.zeros(1)):
+    def construct_weights(self, method= "random", W = np.zeros(1), b = np.zeros(1), initialization=True):
         """Constructs and initializes weights and biases
            random: automatic initialisation with random values
            manual: initialise with given array of weights and biases
@@ -46,15 +46,30 @@ class NeuralNetwork():
         """
         #W = np.asarray(W, dtype=object)
         #b = np.asarray(b, dtype=object)
+        for i in reversed(range(1,len(self.architecture))):
+            if initialization==True:
+                if self.activations[i-1] in {'relu' , 'leakyrelu' , 'ealu'}:
+                    variance = np.sqrt(2/(self.architecture[i-1]))
+                elif self.activations[i-1] == 'tanh':
 
-        if method == 'random':
-            for i in reversed(range(1,len(self.architecture))):
-                self.weights_and_biases[f'W{i}'] = np.random.rand(self.architecture[i-1], self.architecture[i])#
-                self.weights_and_biases[f'b{i}'] = np.random.rand(self.architecture[i])
-        elif method == 'manual':
-            for i in reversed(range(len(self.architecture))):
-                self.weights_and_biases[f'W{i}'] = W[i-1]
-                self.weights_and_biases[f'b{i}'] = b[i-1] 
+                    variance = np.sqrt(6/(self.architecture[i-1] + self.architecture[i]))
+                elif self.activations[i-1] in ('swish' , 'sigmoid'):
+
+                    variance = np.sqrt(1/(self.architecture[i-1]))
+                else:
+
+                    variance = 1
+            elif initialization == False:
+                variance = 1
+            print(i, self.architecture[i-1],variance)
+            if method == 'random':
+                #for i in reversed(range(1,len(self.architecture))):
+                    self.weights_and_biases[f'W{i}'] = np.random.rand(self.architecture[i-1], self.architecture[i])*variance #
+                    self.weights_and_biases[f'b{i}'] = np.zeros(self.architecture[i])*variance
+            elif method == 'manual':
+                #for i in reversed(range(len(self.architecture))):
+                    self.weights_and_biases[f'W{i}'] = W[i-1]
+                    self.weights_and_biases[f'b{i}'] = b[i-1] 
         return self.weights_and_biases
 
     def activation(self, x, type="swish", alpha=0.01):
@@ -510,6 +525,7 @@ class NeuralNetwork():
             y_pred = self.forward_propagate(X_test[i,:])
             y = y_test[i,:]
             Loss = self.cost_functions(y_pred,y, type='mse')
+            print(X_test[i], y, y_pred)
             print('Testl loss: ', Loss)
 
 

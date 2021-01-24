@@ -127,7 +127,9 @@ def QMC_sampling(numSamples, numDimensions, dimensionSpans,sequence='halton', ra
     return QMC_samples
 
 
-def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True):
+def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True, RandomSeed=True):
+    if RandomSeed==True:
+        np.random.seed(42)
     if type(filename_or_array) == str:
         raw_data = np.genfromtxt(filename_or_array, delimiter=delimiter, dtype=str)
         m = np.shape(raw_data)[0]  #number of lines in file
@@ -191,7 +193,7 @@ def data_transform(array, type='z_score_norm'):
             for j in range(np.shape(array)[0]):
                 array[j,i]= (array[j,i] - mean)/std
 
-    if type == "min_max_norm":
+    elif type == "min_max_norm":
         for i in range(np.shape(array)[1]):
             min_ = min(array[:,i])
             max_ = max(array[:,i])
@@ -200,4 +202,6 @@ def data_transform(array, type='z_score_norm'):
                 continue
             for j in range(np.shape(array)[0]):
                 array[j,i]= (array[j,i] - min_)/(max_ - min_)
+    else:
+        raise ValueError("undefined method")
     return array
