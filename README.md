@@ -7,4 +7,6 @@ FEAMAL
 
 
 Other folders
+----
 -respective fem code for generating data.
+-npy files -- files used to save neural network states
