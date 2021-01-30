@@ -10,6 +10,7 @@ setup(
 )
 
 #batch normalisation
+#metrics
 #validation dataset
 
 ##tests

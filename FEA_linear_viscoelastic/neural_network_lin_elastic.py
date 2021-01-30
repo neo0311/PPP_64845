@@ -28,11 +28,12 @@ def vector_to_dict(vector, original_dictionary):
         current_index = new_index
     return new_dictionary
 
-X_train, y_train, X_test, y_test = test_train_split(3, "data_linear_elastic.txt", train_test_ratio=0.8,delimiter=',', header_present=True, RandomSeed=True)
-
+X_train, y_train, X_test, y_test = tst_train_split(3, "data_linear_elastic.txt", train_test_ratio=0.8,delimiter=',', header_present=True, RandomSeed=True)
+y_train, y_test, y_means, y_stds = data_transform(y_train, y_test)
+X_train,X_test, X_means, X_stds = data_transform(X_train,X_test)
 material_routine_nn = NeuralNetwork((3,10, 10,7),activations=('swish','swish','linear'))
 material_routine_nn.construct_weights(initialization=True)
 #material_routine_nn.load_nn('material_routine_1op_data.npy')
-material_routine_nn.train_nn(X_train, y_train, type= "miniBGD", num_of_epochs = 100000000, learning_rate = 1e-4 ,stop_condition = 1000, batch_size= 128, data_transformation= 'None', optimizer = 'adam', plotting=True, output=True)
+material_routine_nn.train_nn(X_train, y_train, type= "miniBGD", num_of_epochs = 100000000, learning_rate = 1e-4 ,stop_condition = 500, batch_size= 32, optimizer = 'adam', plotting=True, output=True)
 material_routine_nn.save_nn('material_routine_allop')
-material_routine_nn.visualise_test_error(X_test, y_test, data_transformation='z_score_norm')
+material_routine_nn.visualise_test_error(X_test, y_test)

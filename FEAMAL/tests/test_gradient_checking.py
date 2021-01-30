@@ -37,7 +37,7 @@ def gradient_checking(network, X, y, epsilon=1e-7):
        epsilon : a small value for calculating gradient by two sided epsilon method
 
     """
-    network.construct_weights()
+    network.construct_parameters()
     network.forward_propagate()
     network.back_propagate(y)
     parameters_original = network.weights_and_biases

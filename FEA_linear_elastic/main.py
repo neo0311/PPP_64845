@@ -127,9 +127,9 @@ def main(E, v, Q, T, a,b,p_max,tL,tF, mesh_refinement_factor, delta_t, num_of_el
                 G = E/(2*(1+v))
                 if f_internal_e[0,0]!= 0 and f_internal_e[1,0]!= 0:
                     #print(E,v,e,p,np.format_float_scientific(f_internal_e[0,0]),np.format_float_scientific(f_internal_e[1,0]),sep=',', file=f)
-                    print(G,e,p,np.format_float_scientific(f_internal_e[0,0]),np.format_float_scientific(f_internal_e[1,0]),f_external_e[0,0],Kte[0,0],Kte[0,1],Kte[1,0],Kte[1,1],sep=',', file=f)
+                    print(G,e,p,np.format_float_scientific(f_internal_e[0,0]),np.format_float_scientific(f_internal_e[1,0]),f_external_e[0,0],Kte[0,0],Kte[1,0],Kte[1,1],sep=',', file=f)
                     #print(G,e,p,np.format_float_scientific(f_internal_e[0,0]),sep=',', file=f)
-                    print(f_external_e[0,0],f_external_e[1,0])
+                    #print(f_external_e[0,0],f_external_e[1,0])
 
 
                 f.close()
@@ -193,7 +193,7 @@ f= open('data_linear_elastic.txt', 'w')
 f.truncate(0)
 #f.write('E,v,element_length,p,f_int[0],f_int[1],f_ext[0],f_ext[1],kte[00],kte[01],kte[10],kte[11]\n')
 #f.write('E,v,element_length,p,f_int[0],f_int[1]\n')
-f.write('G,element_length,p,f_int[0],f_int[1],f_ext[0],kte[00],kte[01],kte[10],kte[11]\n')
+f.write('G,element_length,p,f_int[0],f_int[1],f_ext[0],kte[00],kte[01],kte[11]\n')
 #f.write('G,element_length,p,f_int[0]\n')
 
 

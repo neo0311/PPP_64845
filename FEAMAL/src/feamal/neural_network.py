@@ -1,81 +1,65 @@
 import numpy as np
 from .data_prep import *
 import matplotlib.pyplot as plt
-import json
 
 class NeuralNetwork():
-    """ A neural network"""
+    """ A neural network object"""
     
     def __init__(self, architecture, X=[], y=[], activations=[]):
         """
-        architecture: array with neural network structure information
-        activations:  array with activation functions to be used in each layer
+        architecture  :array with neural network structure information
+        activations   :array with activation functions to be used in each layer
+        X,y           :nd array of input and output datasets(optional)          
         """
         self.architecture = np.asarray(architecture ,dtype=int)
         self.activations = np.asarray(activations)
         self.input = X
         self.output = y
-        self.weights_and_biases = {}
-        self.parameter_gradients ={}
-        self.all_data = {}          #empty dictionary for storing derivatives, temporary data, etc
+        self.weights_and_biases = {}    #empty array for storing weights and biases
+        self.parameter_gradients ={}    #empty array for storing gradients 
+        self.all_data = {}              #empty dictionary for storing derivatives, temporary data, etc
     
-    # def construct_weights_back(self, method= "random", W = np.zeros(1), b = np.zeros(1)):
-    #     """Constructs and initializes weights and biases
-    #        random: automatic initialisation with random values
-    #        manual: initialise with given array of weights and biases
-    #                 -takes in an array 'W' with weight matrices and an array 'b' with bias vectors
-    #     """
-    #     #W = np.asarray(W, dtype=object)
-    #     #b = np.asarray(b, dtype=object)
-
-    #     if method == 'random':
-    #         for i in range(1,len(self.architecture)):
-    #             self.weights_and_biases[f'W{i}'] = np.random.rand(self.architecture[i-1], self.architecture[i])#
-    #             self.weights_and_biases[f'b{i}'] = np.random.rand(self.architecture[i])
-    #     elif method == 'manual':
-    #         for i in range(1,len(self.architecture)):
-    #             self.weights_and_biases[f'W{i}'] = W[i-1]
-    #             self.weights_and_biases[f'b{i}'] = b[i-1] 
-    #     return self.weights_and_biases
-
-    def construct_weights(self, method= "random", W = np.zeros(1), b = np.zeros(1), initialization=True):
+    def construct_parameters(self, method= "random", W = np.zeros(1), b = np.zeros(1), initialization=True):
         """Constructs and initializes weights and biases
-           random: automatic initialisation with random values
-           manual: initialise with given array of weights and biases
-                    -takes in an array 'W' with weight matrices and an array 'b' with bias vectors
+           random          : automatic initialisation with random values
+           manual          : initialise with given array of weights and biases
+                             -takes in an array 'W' with weight matrices and an array 'b' with bias vectors
+           initialization  : 'True' enables Xavier and He initialization methods
         """
         #W = np.asarray(W, dtype=object)
         #b = np.asarray(b, dtype=object)
         for i in reversed(range(1,len(self.architecture))):
+            
             if initialization==True:
                 if self.activations[i-1] in {'relu' , 'leakyrelu' , 'ealu'}:
-                    variance = np.sqrt(2/(self.architecture[i-1]))
+                    variance = np.sqrt(2/(self.architecture[i-1]))                          #He initialization
                 elif self.activations[i-1] == 'tanh':
-
-                    variance = np.sqrt(6/(self.architecture[i-1] + self.architecture[i]))
+                    variance = np.sqrt(6/(self.architecture[i-1] + self.architecture[i]))   #Xavier initialization
                 elif self.activations[i-1] in ('swish' , 'sigmoid'):
-
                     variance = np.sqrt(1/(self.architecture[i-1]))
                 else:
-
                     variance = 1
+            
             elif initialization == False:
                 variance = 1
-            print(i, self.architecture[i-1],variance)
+            
             if method == 'random':
-                #for i in reversed(range(1,len(self.architecture))):
                     self.weights_and_biases[f'W{i}'] = np.random.rand(self.architecture[i-1], self.architecture[i])*variance #
                     self.weights_and_biases[f'b{i}'] = np.zeros(self.architecture[i])*variance
+           
             elif method == 'manual':
-                #for i in reversed(range(len(self.architecture))):
                     self.weights_and_biases[f'W{i}'] = W[i-1]
                     self.weights_and_biases[f'b{i}'] = b[i-1] 
         return self.weights_and_biases
 
     def activation(self, x, type="swish", alpha=0.01):
-        """ Defines the activation function"""
+        """ Defines the activation function
+            x    : input array for activation function calculation
+            type : defines the activation function to use.
+            alpha: a parameter for leakyrelu function
+        """
+
         x = np.asarray(x, dtype=float)
-        #print(x)
         if type == "swish":
             return x/(1+np.exp(-x))
         
@@ -91,25 +75,6 @@ class NeuralNetwork():
         if type == "sigmoid":
             return 1/(1+np.exp(-x))
     
-    # def cost_functions_back(self, y_predicted, y, type="mse"):
-    #     """
-    #     Defines various cost functions
-    #     y_predicted: nD array (mxn) with predicted outputs, m = #datasets, n = #output elements
-    #     y          : nD array with actual outputs
-    #     mse        : mean squared error
-    #     loss       : loss 
-    #     """
-    #     if y.ndim > 1:
-    #         m = np.shape(y)[0]
-    #         n = np.shape(y)[1]
-    #         mean_over_output_elements = np.sum((y_predicted - y)**2, axis=1)/n
-    #         mean_over_all_datasets = np.sum(mean_over_output_elements)/m
-    #         loss = mean_over_all_datasets
-    #     else: 
-    #         mean_over_output_elements = np.sum((y_predicted - y)**2)/len(y)
-    #         loss = mean_over_output_elements
-    #     return loss
-
     def cost_functions(self, y_predicted, y, type="mse"):
         """
         Defines various cost functions
@@ -132,34 +97,13 @@ class NeuralNetwork():
         else:
             raise ValueError("undefined cost function")
         return loss
-
-    def forward_propagate_back(self):
-        """Carries out forward propagation of through the neural network
-           returns: the output of the last layer(output)
-                 A: ndarray which stores the activated output at each layer
-                 Z: variable to temporarly store values before activation
-            """
-        A = np.zeros((len(self.architecture)), dtype=object)
-        A[0] = self.input
-        self.all_data[f'A0'] = A[0]
-        for layer, activation_function in zip(range(1, len(self.architecture)),self.activations):
-            #print(A[layer-1], self.weights_and_biases[f'W{layer}'])
-            #print(layer, activation_function)
-            Z = (A[layer-1].dot(self.weights_and_biases[f'W{layer}']) + self.weights_and_biases[f'b{layer}'])
-            activation_function = self.activations[layer-1]
-            A[layer] = self.activation(Z,type=activation_function)
-            self.all_data[f'Z{layer}'] = Z
-            self.all_data[f'A{layer}'] = A[layer]
-        y_predicted = A[layer]
-        return y_predicted
-
-
+    def performance_metric(self, y, y_predicted, type='mse'):
 
     def forward_propagate(self, X=[]):
         """Carries out forward propagation of through the neural network
            returns: the output of the last layer(output)
                  A: ndarray which stores the activated output at each layer
-                 Z: variable to temporarly store values before activation
+                 Z: variable to temporarly store input values to activation
             """
         A = np.zeros((len(self.architecture)), dtype=object)
         if np.size(X) > 0:
@@ -168,22 +112,21 @@ class NeuralNetwork():
             A[0] = self.input
 
         self.all_data[f'A0'] = A[0]
+        
         for layer, activation_function in zip(range(1, len(self.architecture)),self.activations):
-            #print(A[layer-1], self.weights_and_biases[f'W{layer}'])
-            #print(layer, activation_function)
             Z = (A[layer-1].dot(self.weights_and_biases[f'W{layer}']) + self.weights_and_biases[f'b{layer}'])
             activation_function = self.activations[layer-1]
             A[layer] = self.activation(Z,type=activation_function)
             self.all_data[f'Z{layer}'] = Z
             self.all_data[f'A{layer}'] = A[layer]
+        
         y_predicted = A[layer]
+        
         return y_predicted
-
-
 
     def derivatives(self, x=[], function='sigmoid', alpha=0.01, y_pred = [], y = []):
         """
-        Function with derivatives of the available activation functions
+        Function with derivatives of the available activation functions and loss functions
         """
         if function == "sigmoid":
             dadz = self.activation(x,"sigmoid")*(1-self.activation(x,"sigmoid"))
@@ -210,13 +153,13 @@ class NeuralNetwork():
             if y.ndim > 1:
                 m = np.shape(y)[0]  #number of samples
                 n = np.shape(y)[1]  #number of output elements
+                dCdy_pred = np.sum((y_pred - y), axis=0)*(1/(m*n))*2
+
             else:
                 m = 1
                 n = len(y) 
-            dCdy_pred = np.sum((y_pred - y), axis=0)*(1/(m/n)*2)
+                dCdy_pred = (y_pred - y)*(1/(m*n))*2
             return dCdy_pred
-
-
 
     def back_propagate_bk(self,y):
         if y.ndim > 1:
@@ -272,6 +215,9 @@ class NeuralNetwork():
 
 
     def back_propagate(self,y):
+        """
+        Function to carry out back propagation. Calculates the gradients of cost with respect to various parameters. Then updates them to a dictionary.
+        """
         if y.ndim > 1:
             m = np.shape(y)[0]  #number of samples
             n = np.shape(y)[1]  #number of output elements
@@ -324,6 +270,9 @@ class NeuralNetwork():
                 self.parameter_gradients[f'dCdb{layer}'] = dCdb_l
 
     def adam_parameters_update(self,learning_rate=0.001, beta_1= 0.9, beta_2= 0.999, epsilon=10e-8):
+        """
+        Function to update or initalise the parameters of adam optimizer if needed
+        """
         self.adam_parameters = {}
         self.adam_parameters['learning_rate'] = learning_rate
         self.adam_parameters['beta_1'] = beta_1
@@ -331,11 +280,7 @@ class NeuralNetwork():
         self.adam_parameters['epsilon'] = epsilon
 
 
-    def train_nn(self, X_train, y_train, type= "SGD", num_of_epochs = 1000, learning_rate = 0.001,stop_condition = 1000, batch_size= 32, data_transformation='None',optimizer= 'None', plotting=True, output=True):            
-        if data_transformation == 'None':
-            X_train = X_train
-        else:
-            X_train = data_transform(X_train, type=data_transformation)
+    def train_nn(self, X_train, y_train, type= "SGD", num_of_epochs = 1000, learning_rate = 0.001,stop_condition = 1000, batch_size= 32, optimizer= 'None', plotting=True, output=True):            
 
         if type == "SGD":
             batch_size = 1
@@ -465,7 +410,7 @@ class NeuralNetwork():
 
             if output == True:
                 generalised_cost = np.format_float_scientific(np.sum(individual_loss)/len(individual_loss))
-                print('Epoch: ', epoch, 'Generalised Cost: ', generalised_cost)
+                print('Epoch: ', epoch, 'Generalised Cost(mse): ', generalised_cost)
             
             if plotting == True:
                 Generalised_cost.append(float(generalised_cost))
@@ -516,16 +461,19 @@ class NeuralNetwork():
     def predict(self, data):
         return self.forward_propagate(data)
 
-    def visualise_test_error(self, X_test, y_test, plotting=True, data_transformation= 'None'):
-        if data_transformation =='z_score_norm':
-            X_test = data_transform(X_test, type='z_score_norm')
-        elif data_transformation == 'min_max_norm':
-            X_test = data_transform(X_test, type='min_max_norm')
+    def visualise_test_error(self, X_test, y_test, plotting=True):
+        # if data_transformation =='z_score_norm':
+        #     X_test = data_transform(X_test, type='z_score_norm')
+        # elif data_transformation == 'min_max_norm':
+        #     X_test = data_transform(X_test, type='min_max_norm')
+        max_error = 0
         for i in range(np.shape(X_test)[0]):
             y_pred = self.forward_propagate(X_test[i,:])
             y = y_test[i,:]
             Loss = self.cost_functions(y_pred,y, type='mse')
-            print(X_test[i], y, y_pred)
-            print('Testl loss: ', Loss)
-
-
+            if Loss>max_error:
+                max_error = Loss
+            print('Relative Error', np.abs(y-y_pred)/np.abs(y))
+            #print(X_test[i], y, y_pred)
+            print('Test loss(mse): ', Loss)
+        #print(max_error)

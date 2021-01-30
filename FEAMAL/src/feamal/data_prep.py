@@ -127,7 +127,7 @@ def QMC_sampling(numSamples, numDimensions, dimensionSpans,sequence='halton', ra
     return QMC_samples
 
 
-def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True, RandomSeed=True):
+def tst_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, delimiter=',', header_present=True, RandomSeed=True):
     if RandomSeed==True:
         np.random.seed(42)
     if type(filename_or_array) == str:
@@ -158,7 +158,6 @@ def test_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, 
     X_test = (np.take(raw_data[:,:numInputFeatures], indicesTestData, axis=0)).astype(np.float)
     y_test = (np.take(raw_data[:,numInputFeatures:], indicesTestData, axis=0)).astype(np.float)
     return X_train, y_train, X_test, y_test
-#test_train_split(6, train_test_ratio=0.8, filename="data_linear_elastic.txt", delimiter=',', header_present=True)
 
 def shuffle_data(X, y):
     """
@@ -175,33 +174,72 @@ def shuffle_data(X, y):
     y_shuffled =    data[:,n:] #slicing output data from dataset
     return X_shuffled, y_shuffled
 
-def data_transform(array, type='z_score_norm'):
+def data_transform(array, array2 = None,type='z_score_norm', means=None, stds=None):
     """
     Transforms data in the given array according to the type
     array   :an nd numpy array. 
+    array2  :an nd numpy array(optional-for multidimensional datasets)
     type    :'z_score_norm' = implements z score normalisation using mean and standard deviation on each column (datasets of each variable) of the given array.
              'min_max_norm' = implements min max scaling on each column (datasets of each variable) of the given array.
+             'back_transform_z_score_norm' = returns the original data without z_score transformations.
+             'back_transform_min_max_norm' = returns the original data without min_max transformations.
+    means   :mean values(or min values) of each variable datasets - used for reverse transformation of data
+    stds    :standard deviation values(or max values) of each variable datasets - used for reverse transformation of data
+
     """
     if array.ndim == 1:
         array = np.reshape(array,(len(array),1))
+    
+    if array2.ndim == 1:
+        array2 = np.reshape(array2,(len(array2),1))
+    assert(np.shape(array)[1]) == np.shape(array2)[1]
     if type== "z_score_norm":
+        means =[]
+        stds = []
         for i in range(np.shape(array)[1]):
             mean = np.mean(array[:,i])
             std = np.std(array[:,i])
+            means.append(mean)
+            stds.append(std)
             if mean == 0 and std == 0:
                 continue
             for j in range(np.shape(array)[0]):
                 array[j,i]= (array[j,i] - mean)/std
+            if array2.all() != None:
+                for j in range(np.shape(array2)[0]):
+                    array2[j,i]= (array2[j,i] - mean)/std
+
 
     elif type == "min_max_norm":
         for i in range(np.shape(array)[1]):
             min_ = min(array[:,i])
             max_ = max(array[:,i])
-            print(min_, max_)
+            #print(min_, max_)
             if min_ == 0 and max_ == 0:
                 continue
             for j in range(np.shape(array)[0]):
                 array[j,i]= (array[j,i] - min_)/(max_ - min_)
+            if array2.all() != None:
+                for j in range(np.shape(array2)[0]):
+                    array2[j,i]= (array2[j,i] - min_)/(max_ - min_)
+    elif type == "back_transform_z_score_norm":
+        assert(means) != None
+        assert(stds) != None
+        for i in range(np.shape(array)[1]):
+            mean = means[i]
+            std = stds[i]
+            if mean == 0 and std == 0:
+                continue
+            for j in range(np.shape(array)[0]):
+                array[j,i] = array[j,i] *std + mean
+            if array2.all() != None:
+                for j in range(np.shape(array2)[0]):
+                    array2[j,i] = array2[j,i] *std + mean
+
     else:
         raise ValueError("undefined method")
-    return array
+    if array2.all() != None:
+        return array, array2, means, stds
+    else:
+
+        return array, means, stds
