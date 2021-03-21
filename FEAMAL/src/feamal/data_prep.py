@@ -159,6 +159,16 @@ def tst_train_split(numInputFeatures, filename_or_array, train_test_ratio=0.8, d
     y_test = (np.take(raw_data[:,numInputFeatures:], indicesTestData, axis=0)).astype(np.float)
     return X_train, y_train, X_test, y_test
 
+def read_data(numInputFeatures, filename, delimiter=',', header_present=True):
+    raw_data = np.genfromtxt(filename, delimiter=delimiter, dtype=str)
+    if header_present == True:
+        firstIndex = 1
+    else:
+        firstIndex = 0
+    X = (raw_data[firstIndex:,:numInputFeatures]).astype(np.float)
+    y = (raw_data[firstIndex:, numInputFeatures:]).astype(np.float)
+    return X, y
+
 def shuffle_data(X, y):
     """
     Shuffles the data sets 

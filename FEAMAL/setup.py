@@ -10,10 +10,11 @@ setup(
 )
 
 #batch normalisation
-#metrics
 #validation dataset
+#stop condititon
+#model evaluations
+#model plots
 
-##tests
-#-LHC
-#test_train_split
-#construct_weights 
+#next commit
+# new data handling function 
+#plotting
