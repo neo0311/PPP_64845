@@ -2,18 +2,20 @@ import numpy as np
 from material import *
 import matplotlib.pyplot as plt
 
-#E                          % Young's modulus
-#v                          % Poisson's ratio
-#sigmay0                    % initial yield stress
-#H                          % kinematic hardening modulus
-#h                          % isotropic hardening modulus
-#G                          % shear modulus
-#k                          % bulk modulus
+###Consistant driver algorithm for checking the validity of material routine outside FEM framework.###
+###Coded by myself under PPP##
+###Used for generating data###
+
 
 def voigt_transform(X):
+    """
+    Function to transform normal representation to  voigt representation.
+    X     : nd tensor(stresses, strains or elastic stiffness tensor)
+    Voigt : respective voigt representations
+    """
+
     if np.array_equal(np.shape(X), np.asarray((3,3,3,3)))==True:
         """
-
         Transforms the given stress, strain and elasticity tensor to voigt matrices
         source: https://github.com/libAtoms/matscipy
         """
@@ -44,6 +46,7 @@ def voigt_transform(X):
 def voigt_reverse_transform(X_voigt):
     """
     Transforms voigt arrays to respective tensors
+    X_voigt  : array in voigt representation.
     """
     Voigt  = np.zeros((3,3))
     if np.array_equal(np.shape(X_voigt), np.asarray([6,1])) and np.size(X_voigt)==6:
@@ -58,10 +61,24 @@ def voigt_reverse_transform(X_voigt):
 def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=0):
     """
     Driver routine to check the respective material routine
+        E                          :Young's modulus
+        v                          :Poisson's ratio
+        sigmay0                    :initial yield stress
+        H                          :kinematic hardening modulus
+        h                          :isotropic hardening modulus
+        G                          :shear modulus
+        k                          :bulk modulus
+        Tf                         :Final loading time
+        delta_t                    :time interval for loading
+        load_max                   :maximum loading
     """
+    
+    
     ################################Test
     C_voigt_values = []
     ###
+    
+    #initialisation of variables
     t_start = 0    
     t_end = Tf
     eps11_ = 0         #strain[1,1]
@@ -69,8 +86,6 @@ def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=
     eps11_values = []   #strain[1,1] values for plotting
     delta_eps11 = load_max/(t_end/delta_t)
     num_time_steps = np.size(np.arange(t_start,t_end+delta_t, delta_t))
-
-    #linear ramping of load
     eps = np.zeros((3,3))  
     eps_bar = np.zeros((5,1))                                 #current strain matrix
     eps_values = np.zeros((1,num_time_steps), dtype=object)     #array for storing strain matrices
@@ -86,6 +101,8 @@ def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=
     step = 1
     
     max_step =150
+    #linear ramping of load
+
     for time in np.arange(t_start+delta_t,t_end+delta_t, delta_t):  #load stepping
         print('\n\n',step)
         if time==t_start:
@@ -123,13 +140,13 @@ def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=
             #print('\nC_out11', C_voigt[0,0], '\nC_out12', C_voigt[0,1], '\nC_out22', C_voigt[1,1], '\nC_out23', C_voigt[1,2], '\nC_out44', C_voigt[3,3])
             #print('E', E,'\nG', G, '\nk',k,'\nv', v,'\nsigmay0', sigmay0,'\nH', H,'\nh',h, '\neps', eps, '\nepspk', epsp_k,'\nAlpha_k', Alpha_k, '\nalpha_k', alpha_k,'\nepspk1' ,epsp_k1,'\nAlpha_k1', Alpha_k1, '\nalpha_k1', alpha_k1, '\nsigma', sigma, '\nC', voigt_transform(C) )
             #print('\neps', eps, '\nepspk', epsp_k,'\nAlpha_k', Alpha_k, '\nalpha_k', alpha_k,'\nepspk1' ,epsp_k1,'\nAlpha_k1', Alpha_k1, '\nalpha_k1', alpha_k1, '\nsigma', sigma, '\nC', C_voigt )
-            print('eps11', eps[0,0],'eps22', eps[1,1], '\nepspk11', epsp_k[0,0],'\nepspk22', epsp_k[1,1],'\nAlpha_k11', Alpha_k[0,0],'\nAlpha_k22', Alpha_k[1,1], '\nalpha_k', alpha_k,'\nepspk_out11' ,epsp_k1[0,0],'\nepspk_out22' ,epsp_k1[1,1],'\nAlpha_k_out11', Alpha_k1[0,0], '\nAlpha_k_out22', Alpha_k1[1,1],'\nalpha_k_out', alpha_k1, '\nsigma_out11', sigma[0,0],'\nsigma_out22', sigma[1,1], '\nC_out11', C_voigt[0,0], '\nC_out12', C_voigt[0,1], '\nC_out22', C_voigt[1,1], '\nC_out23', C_voigt[1,2], '\nC_out44', C_voigt[3,3])
+            #print('eps11', eps[0,0],'eps22', eps[1,1], '\nepspk11', epsp_k[0,0],'\nepspk22', epsp_k[1,1],'\nAlpha_k11', Alpha_k[0,0],'\nAlpha_k22', Alpha_k[1,1], '\nalpha_k', alpha_k,'\nepspk_out11' ,epsp_k1[0,0],'\nepspk_out22' ,epsp_k1[1,1],'\nAlpha_k_out11', Alpha_k1[0,0], '\nAlpha_k_out22', Alpha_k1[1,1],'\nalpha_k_out', alpha_k1, '\nsigma_out11', sigma[0,0],'\nsigma_out22', sigma[1,1], '\nC_out11', C_voigt[0,0], '\nC_out12', C_voigt[0,1], '\nC_out22', C_voigt[1,1], '\nC_out23', C_voigt[1,2], '\nC_out44', C_voigt[3,3])
             
             ####dataset generation #################
             f = open('data_elasto_plastic.txt', 'a+')
-            #print(5, file=f)
             print(eps[0,0],eps[1,1],epsp_k[0,0],epsp_k[1,1],Alpha_k[0,0],Alpha_k[1,1],alpha_k,epsp_k1[0,0],epsp_k1[1,1],Alpha_k1[0,0],Alpha_k1[1,1],alpha_k1,sigma[0,0],sigma[1,1],C_voigt[0,0],C_voigt[0,1],C_voigt[1,1],C_voigt[1,2],C_voigt[3,3],sep=',', file=f)
             f.close()
+            
             epsp_k, Alpha_k, alpha_k = epsp_k1, Alpha_k1, alpha_k1
 
             #reduction
@@ -144,9 +161,7 @@ def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=
             eps_voigt = voigt_transform(eps)
             eps_voigt[1:,:] = eps_bar
             eps = voigt_reverse_transform(eps_voigt)
-             
-            #print(np.linalg.norm(sigma_bar))
-            
+                         
             #stop condition
             if iteration == iterations or np.linalg.norm(sigma_bar)<tol:
                 epsp_values[0,step], Alpha_values[0,step], alpha_values[0,step] = epsp_k, Alpha_k, alpha_k
@@ -162,10 +177,8 @@ def global_routine(Tf, delta_t,load_max, E=0, G =0, k=0, v=0, sigmay0=0, H=0, h=
 
     #plt.show()
     
-    #convert C to matrix form - remove rows and columns
-    #convert stresses to voigt - remove first rows
-    #same for strain
 
+#material paramters used
 Tf = 10
 delta_t = 1
 load_max = 0.005
