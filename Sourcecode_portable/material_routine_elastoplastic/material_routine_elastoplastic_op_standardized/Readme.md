@@ -1,0 +1,1 @@
+PyANNET neural network implementation with data fed into the neural network both output and input-standardized

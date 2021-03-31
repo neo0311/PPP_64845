@@ -1,0 +1,1 @@
+PyANNET neural network implementation in which the data fed into neural network is only input-standardized.

@@ -1,0 +1,1 @@
+Material routine and neural network implementation of 3D von Mises elasto-plasticity

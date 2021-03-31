@@ -1,0 +1,1 @@
+FEA and neural network implementations of a linear elastic pipe under internal pressure

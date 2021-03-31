@@ -153,16 +153,16 @@ class NeuralNetwork():
                 mean_over_all_datasets = np.sum(mean_over_output_elements)/m
                 metric = mean_over_all_datasets
             else: 
-                mean_over_output_elements = np.sum(np.abs(y_predicted-y)/np.maximum(1e-8,y))/(len(y))
+                mean_over_output_elements = np.sum(np.abs(y_predicted-y)/np.maximum(1e-8,np.abs(y)))/(len(y))
                 metric = mean_over_output_elements    
         
         elif type == 'r2':
             if y.ndim > 1:
-                m = np.shape(y)[0]  #number of samples
-                n = np.shape(y)[1]  #number of output elements
+                n = np.shape(y)[0]  #number of samples
+                m = np.shape(y)[1]  #number of output elements
                 y_mean_over_output_elements = np.sum(y, axis=0)/m
                 y_mean = y_mean_over_output_elements
-                r2_over_output_elements = (np.sum((y-y_predicted)**2, axis=0))/(np.sum((y-y_mean)**2, axis=0))
+                r2_over_output_elements = (np.sum((y-y_predicted)**2, axis=0))/((np.sum((y-y_mean)**2, axis=0)))
                 r2_over_output_elements = np.sum(r2_over_output_elements)/n
                 metric = 1 - r2_over_output_elements
             else: 
@@ -623,6 +623,74 @@ class NeuralNetwork():
                         plt.title(f'train and test {metric}')
                         plt.yscale('log')
                         plt.legend()
+                        plt.grid(axis='both', which='both')
                         plt.savefig(f'plot_assessment_{metric}.png')
-                        plt.show()    
+                        #plt.show()    
                 break   
+
+    def validate_nn(self, X_test, y_test, plotting=True, output=True, output_metrics=('mae'), num_of_epochs=100):
+        """
+        Function to validate the neural network and visualising various metrics. Available parameters are:
+        X_test          :nd array containing the testing input dataset.
+        y_test          :nd array containing the testing output dataset
+        num_of_epochs   :defines the maximum number of epochs to train.
+        stop_condition  :enables early stoping of the training process.
+        plotting        :Enables(True) or disables(False) plotting functions
+        output          :Enables(True) or disables(False) printing summary statistics.
+        output_metrics  :list specifying which all metrics to be calculated while training.
+                            mse   :  Mean squared error
+                            mae   :  Mean absolute error
+                            msle  :  Mean squared log error. (Don't use this with negative dataset values)
+                            mape  :  Mean apsolute percentage error
+                            r2    :  Coefficient of determination (R2). Warning: Using with less samples(eg: SGD) produces unexpected values.
+                            rmse  :  Root mean squared error
+        """
+        
+        if np.size(output_metrics)==1:
+            metrics = np.full((1),output_metrics)
+        else:
+            metrics = np.array(output_metrics)
+
+        num_of_datasets = np.shape(X_test)[0]
+
+        for metric in metrics:
+            self.metrics[f'test_{metric}'] = []
+        
+        if plotting == True:
+                for metric in metrics:
+                    self.metrics[f'test_{metric}_plot'] = []
+        
+        #start of iterative training 
+        for epoch in range(num_of_epochs):
+            for metric in metrics:
+                self.metrics[f'Individual_{metric}'] = []
+            X_test, y_test = shuffle_data(X_test, y_test)
+            y_pred = self.forward_propagate(X_test)
+            for metric in metrics:
+                self.metrics[f'Individual_{metric}'].append(self.performance_metrics(y_test, y_pred, metric))
+            
+            ##printing metric data
+            if output == True:
+                print('\nTest Epoch: ', epoch+1)
+                for metric in metrics:
+                    self.metrics[f'test_{metric}'] = np.format_float_scientific(np.sum(self.metrics[f'Individual_{metric}'])/len(self.metrics[f'Individual_{metric}']))
+                    print(f'Test_{metric}:  ',self.metrics[f'test_{metric}'])
+
+                #for plotting purposes
+                if plotting == True:
+                    self.metrics[f'test_{metric}_plot'].append(float(self.metrics[f'test_{metric}']))
+
+                if epoch == num_of_epochs-1:
+                    if plotting == True:
+                        fig, ax = plt.subplots()
+                        for metric in metrics:
+                            epochs_plot = np.linspace(1,len(self.metrics[f'test_{metric}_plot']), len(self.metrics[f'test_{metric}_plot']))
+                            plt.plot(epochs_plot, self.metrics[f'test_{metric}_plot'], label=f'{metric}')
+                        
+                            plt.xlabel('epochs')
+                            plt.ylabel(f'{metric}')                        
+                            plt.title(f'Test metrics')
+                            plt.legend()
+                            plt.grid(axis='both', which='both')
+                            plt.savefig(f'plot_test_metrics.png')
+                            #plt.show()

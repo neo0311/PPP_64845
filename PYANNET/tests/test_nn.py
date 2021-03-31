@@ -18,7 +18,7 @@ def test_nn_activation_linear():
 def test_nn_activation_leakyrelu():
     assert(NeuralNetwork((4, 2, 1)).activation(x=[(-10, -5, 0.0, 5, 10)],type="relu")).all() == (np.asarray((-0.1, -0.05,  0.,    5.,   10.  ))).all()
 
-def test_nn_forward_propagate_1_hidden_layer_with_1_node_each_with_linear_activations_unit_paraconstruct_parameters_return_input():
+def test_nn_forward_propagate_1_hidden_layer_with_1_node_each_with_linear_activations_unit_parameters_return_input():
     X = np.asarray(1)
     d = NeuralNetwork((1,1,1), X , activations=('linear','linear'))
     W1 = 1
@@ -30,7 +30,7 @@ def test_nn_forward_propagate_1_hidden_layer_with_1_node_each_with_linear_activa
     d.construct_parameters(method='manual', W=W, b=b)
     assert(d.forward_propagate()) == X
 
-def test_nn_forward_propagate_2_hidden_layer_with_1_node_each_with_linear_activations_unit_paraconstruct_parameters_return_input():
+def test_nn_forward_propagate_2_hidden_layer_with_1_node_each_with_linear_activations_unit_parameters_return_input():
     X = np.asarray(1)
     d = NeuralNetwork((1,1,1,1), X , activations=('linear', 'linear', 'linear'))
     W1 = 0
@@ -46,7 +46,10 @@ def test_nn_forward_propagate_2_hidden_layer_with_1_node_each_with_linear_activa
     d.construct_parameters(method='manual', W=W, b=b)
     assert(d.forward_propagate()) == X
 
-def test_nn_forward_propagate_1_hidden_layer_with_1_node_each_with_linear_activations_unit_paraconstruct_parameters_and_biases_return_2_plus_input():
+def test_nn_forward_propagate_1_hidden_layer_with_1_node_each_with_linear_activations_unit__parameters_return_2_plus_input():
+    """
+    Forward propagation of neural network with 1 hidden layer with linear activation with unit parameters return 2 plus input
+    """
     X = np.asarray(2)
     d = NeuralNetwork((1,1,1), X , activations=('linear','linear'))
     W1 = 1
@@ -147,7 +150,7 @@ def test_performance_metrics_r2():
     a = NeuralNetwork((4,2,1))
     y_true = [[0.5, 1], [1, 1], [7, 6]]
     y_pred = [[0, 2], [1, 2], [8, 5]]
-    assert(a.performance_metrics(np.asarray(y_true),np.asarray( y_pred), 'r2')) == 0.8861146496815286
+    assert(a.performance_metrics(np.asarray(y_true),np.asarray( y_pred), 'r2')) == 0.9416004707266843
 
 
 def test_performance_metrics_rmse():

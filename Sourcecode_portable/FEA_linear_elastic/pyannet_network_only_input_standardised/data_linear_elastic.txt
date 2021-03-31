@@ -1,0 +1,1 @@
+G,element_length,p,f_int[0],f_int[1],f_ext[0],kte[00],kte[01],kte[11]
