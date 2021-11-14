@@ -1,8 +1,8 @@
 # PPP_64845
 
-FEAMAL
+PYANNET
 ======
-This folder contains source files of the FEAMAL package which consists of the codes for neural network and data preparation.
+This folder contains source files of the PYANNET package which consists of the codes for neural network and data preparation.
 ------------------
 
 
